@@ -1,8 +1,6 @@
 <firmware>
 		<settings>
-			<setting name="input" state="true">asdergergergerger</setting>
-			<setting name="output" state="false">asd</setting>
-			<setting></setting>
+			
 		</settings>
 	<firewall active="no">
 	</firewall>

@@ -128,8 +128,8 @@ doc = LibXML::XML::Document.file("test.xml")
 model = 
 Root "firmware", :nillable, :source => doc do
 	List "settings" do
-    	ListMember "setting", :nillable do
-      		Attribute "name", :nillable
+    	ListMember "setting" do
+      		Attribute "name", :default => 'none'
       		Attribute "state", :nillable
     	end
   	end

@@ -5,7 +5,31 @@ module XmlModel
 	module Structs
 		
 		module Base
-			def readSource
+			def readSource (source, &block)
+				sources = [source].flatten
+				
+				if sources.length == 0 and not @options[:nillable]
+					result = {@name => {}}
+					source = nil
+					@children.each do |child|
+						child[:source] = source
+						rendered = child.render(:toXml)
+						result[@name].merge!( rendered ) if rendered.class == Hash
+						result[@name] = rendered if rendered.class == Array
+					end
+					yield result
+				end
+				
+				sources.each do |source|
+					result = {@name => {}}
+					@children.each do |child|
+						child[:source] = source
+						rendered = child.render(:toXml)
+						result[@name].merge!( rendered ) if rendered.class == Hash
+						result[@name] = rendered if rendered.class == Array
+					end
+					yield result
+				end
 			end
 		end
 		
@@ -16,12 +40,9 @@ module XmlModel
 					source = XmlModel::Source::Xml.new @options[:source].find_first("#{path}/#{@name}")
 				end
 
-				result = {@name => {}}
-				@children.each do |child|
-					child[:source] = source
-					result[@name].merge!( child.render(:toXml) )
+				readSource source do |result|
+					return result
 				end
-				return result
 			end
 		end
 				
@@ -30,15 +51,9 @@ module XmlModel
 				if @options[:source]
 					sources = @options[:source].multiple_element(@name)
 				end
+				
 				results = []
-				sources.each do |source|
-					result = {@name => {}}
-					@children.each do |child|
-						child[:source] = source
-						rendered = child.render(:toXml)
-						result[@name].merge!( rendered ) if rendered.class == Hash
-						result[@name] = rendered if rendered.class == Array
-					end
+				readSource sources do |result|
 					results << result
 				end
 				return results
@@ -51,14 +66,9 @@ module XmlModel
 					source = @options[:source].single_element(@name)
 				end
 				
-				result = {@name => {}}
-				@children.each do |child|
-					child[:source] = source
-					rendered = child.render(:toXml)
-					result[@name].merge!( rendered ) if rendered.class == Hash
-					result[@name] = rendered if rendered.class == Array
+				readSource source do |result|
+					return result
 				end
-				return result
 			end
 		end
 		
@@ -72,8 +82,10 @@ module XmlModel
 					source = @options[:source].attribute(@name)
 				end
 
-				if not source.nil? or not @options[:nillable]
+				if not source.nil? and not @options[:nillable]
 					return {@name => source}
+				elsif not @options[:nillable]
+					return {@name => @options[:default]}
 				else
 					return {}
 				end
