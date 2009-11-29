@@ -144,7 +144,7 @@ module XmlModel
 			
 			def find(name, &block)
 				@document.children.each do |child|
-					if child.node_type == LibXML::XML::Node::ELEMENT_NODE and child.name = name
+					if child.node_type == LibXML::XML::Node::ELEMENT_NODE and child.name == name
 						yield child
 					end
 				end	
