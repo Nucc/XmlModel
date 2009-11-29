@@ -32,22 +32,28 @@ module XmlModel
     class Form < Base
       
       # nevet adhassunk meg, es onnan olvassa ki rogton (tomb???)
-      def initialize(source = nil, parent = nil)
-        super source, parent
-#        @name  = name
-        @value = source["#value"] unless source.nil?
+      def initialize(name, source = nil, parent = nil)
+        @name  = name
+        if source.class == XmlModel::Source::Form
+          source = source.source
+        end
+
+        if source
+          @value = source["#value"]
+          @source = read(name, source)
+        end
       end
       
-      def read(name)
+      def read(name, source)
         result = []
-        if @source[name].class == Array
-          @source[name].each do |element|
-            result << Form.new(element, self)
+        if source[name].class == Array
+          source[name].each do |element|
+            result << Form.new(name, element, self)
           end
-        elsif @source[name].class == Hash
-          return Form.new(@source[name], self)
+        elsif source[name].class == Hash
+          return Form.new(name, source[name], self)
         else
-          return @source[name]
+          return source[name]
         end
         return result
       end

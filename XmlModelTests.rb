@@ -10,10 +10,13 @@ class XmlModelTest < Test::Unit::TestCase
   end
   
   def test_read
-    base = XmlModel::Source::Form.new(@source)
-    foo = base.read("foo")
-    assert_equal(foo.source, {"bar" => [{"apple" => "Alma"}, {"pear" => "Korte"}] })
-    bar = foo.read("bar")
+    base = XmlModel::Source::Form.new("foo", @source)
+#    p base
+#    foo = base.read("foo")
+#    assert_equal(foo.source, {"bar" => [{"apple" => "Alma"}, {"pear" => "Korte"}] })
+#    bar = foo.read("bar")
+ 
+    bar = XmlModel::Source::Form.new("bar", base)
     
     assert_equal(bar[0].source, {"apple" => "Alma"})
     assert_equal(bar[1].source, {"pear" => "Korte"})
@@ -26,9 +29,9 @@ class XmlModelTest < Test::Unit::TestCase
   end
   
   def test_write
-    child = XmlModel::Source::Form.new
+    child = XmlModel::Source::Form.new("foo")
     child.value = 12
-    p child.render
+    #p child.render
     
     #base.addTag()
     
