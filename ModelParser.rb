@@ -1,14 +1,21 @@
-require "XmlModelParsers.rb"
-
 module XmlModel
   
 	class Model
 		
+		attr_reader :model
+		
+        @@sources = {}
+        
 		def initialize (element)
         	@struct = {}
         	@struct[:options] = {}
         	@struct[:children] = []
+        	@struct[:name] = String.new
         	@factory = element
+        	@factory.options  = @struct[:options]
+			@factory.children = @struct[:children]
+			@factory.name     = @struct[:name]
+			@model = {}
       	end
       
       	def [] (value)
@@ -24,7 +31,8 @@ module XmlModel
       	end
       
       	def name= (name)
-        	@struct[:name] = name
+        	@struct[:name].replace name
+        	@struct[:name].freeze
       	end
 		
 		def children ()
@@ -32,11 +40,16 @@ module XmlModel
 		end
       
       	def render (toWhat)
-			@factory.options  = @struct[:options]
-			@factory.children = @struct[:children]
-			@factory.name     = @struct[:name]
-        	@factory.send toWhat
       	end
+
+        def source= (source)
+            @struct[:options][:source] = source
+            method = source.class.to_s.split("::").last
+            
+            # if the class name is Xml, we call fetchXml method to generate 
+            # model structure
+            @model = @factory.send("fetch#{method}")
+        end
 
 	end
   
@@ -92,6 +105,7 @@ module XmlModel
 
 
     module Structs
+        
 		module Base
 			attr_writer :options
 			attr_writer :children
@@ -117,20 +131,24 @@ module XmlModel
       	class Attribute
 			include Base
       	end
+      	
 	end
 end
 
+# it will be a Model file somewhere in the app
+require "XmlModelParsers.rb"
 include XmlModel
-
 
 doc = LibXML::XML::Document.file("test.xml")
 
+doc = Source::Xml.open("test.xml")
+
 model = 
-Root "firmware", :nillable, :source => doc do
+Root "firmware", :nillable do
 	List "settings" do
     	ListMember "setting" do
-      		Attribute "name", :default => 'none'
-      		Attribute "state", :nillable
+      		Attribute "name"
+      		Attribute "state"
     	end
   	end
 
@@ -139,4 +157,6 @@ Root "firmware", :nillable, :source => doc do
   	end
 end
 
-p (model.render :toXml)
+model.source = doc
+p model.model
+#p model
