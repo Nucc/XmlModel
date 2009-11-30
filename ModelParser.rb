@@ -137,11 +137,16 @@ end
 
 # it will be a Model file somewhere in the app
 require "XmlModelParsers.rb"
+require "HtmlParamParser.rb"
 include XmlModel
 
 doc = LibXML::XML::Document.file("test.xml")
 
 doc = Source::Xml.open("test.xml")
+
+html = Source::Html.new({"firmware" => {"settings" => [{"setting" => {"name" => 12}}]}})
+
+p html
 
 model = 
 Root "firmware", :nillable do
@@ -157,6 +162,6 @@ Root "firmware", :nillable do
   	end
 end
 
-model.source = doc
+model.source = html
 p model.model
 #p model

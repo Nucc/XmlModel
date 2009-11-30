@@ -178,9 +178,6 @@ module XmlModel
 			end
 		end
     end
-
-
-
 end
 
 
