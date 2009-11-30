@@ -48,7 +48,7 @@ module XmlModel
             
             # if the class name is Xml, we call fetchXml method to generate 
             # model structure
-            @model = @factory.send("fetch#{method}")
+            @model = @factory.send("fetch")
         end
 
 	end
@@ -144,9 +144,9 @@ doc = LibXML::XML::Document.file("test.xml")
 
 doc = Source::Xml.open("test.xml")
 
-html = Source::Html.new({"firmware" => {"settings" => [{"setting" => {"name" => 12}}]}})
+html = Source::Html.new({"firmware" => {"settings" => [{"setting" => {"name" => 12, "state" => "no"}}]}})
 
-p html
+
 
 model = 
 Root "firmware", :nillable do
@@ -162,6 +162,6 @@ Root "firmware", :nillable do
   	end
 end
 
-model.source = html
+model.source = doc
 p model.model
 #p model

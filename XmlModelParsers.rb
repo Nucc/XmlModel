@@ -108,7 +108,7 @@ module XmlModel
 		end
 
 		class Root
-			def fetchXml
+			def fetch
 				if @options[:source]
 				    # Default path is "/@name"
 					path = @options[:path] ? @options[:path] + "/#{@name}" : "/#{@name}"
@@ -123,7 +123,7 @@ module XmlModel
 		end
 		
 		class ListMember
-			def fetchXml
+			def fetch
 				if @options[:source]
 					sources = @options[:source].multiple_element(@name)
 				end
@@ -137,7 +137,7 @@ module XmlModel
 		end
 
 		class Element
-			def fetchXml
+			def fetch
 				if @options[:source]
 					source = @options[:source].single_element(@name)
 				end
@@ -150,7 +150,7 @@ module XmlModel
 
         # TODO: valahogy osszehozni az Element::fetchXml metodussal
 		class List
-		    def fetchXml
+		    def fetch
 				if @options[:source]
 					source = @options[:source].single_element(@name)
 				end
@@ -163,7 +163,7 @@ module XmlModel
 
 
 		class Attribute
-			def fetchXml
+			def fetch
 				if @options[:source]
 					source = @options[:source].attribute(@name)
 				end
@@ -179,6 +179,3 @@ module XmlModel
 		end
     end
 end
-
-
-	

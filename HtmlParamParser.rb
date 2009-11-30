@@ -21,54 +21,23 @@ module XmlModel
 			end
 			
 			def single_element (name)
-				p @document
-				p name
-				return Html.new( @document[name] )
+				return Html.new( @document[name] ) if @document[name]
+				return nil
 			end
 			
 			def multiple_element (name)
 				result = []
 				@document.each do |value|
-					result << Html.new(value)
+					result << Html.new(value[name]) if value[name]
 				end
 				return result
 			end
-		end
-	end
-	
-	module Structs
-		
-		class Root
-			def fetchHtml
-				source = @options[:source].single_element(@name)
-				_xml_read_source source do |result|
-					return result
-				end
-			end
-		end
-		
-		class List
-			def fetchHtml
-				fetchXml
-			end
-		end
-		
-		class ListMember
-			def fetchHtml
-				fetchXml
-			end
-		end
-		
-		class Element
-			def fetchHtml
-				fetchXml
-			end
-		end
-		
-		class Attribute
-			def fetchHtml
-				fetchXml
-			end
+			
+			def seek (path)
+			    path.split("/").each do |p|
+			        @document = @document[p] if p != ""
+			    end
+		    end
 		end
 	end
 end
