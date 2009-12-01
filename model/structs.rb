@@ -1,79 +1,70 @@
-require 'rubygems'
-require 'libxml'
+require 'model/model.rb'
 
 module XmlModel
 	
-	module Source
-	
-		module Interface
-			def attribute (attribute)
-			end
-			
-			def content
-			end
-			
-			def single_element (name)
-			end
-			
-			def multiple_element (name)
-			end
+	def Root (*args, &block)
+    	traversal(args, Structs::Root.new, &block)
+    end
+    
+    def Element (*args, &block)
+      	traversal(args, Structs::Element.new, &block)
+    end
+    
+    def List (*args, &block)
+      	traversal(args, Structs::List.new, &block)
+    end
+    
+	def ListMember (*args, &block)
+      	traversal(args, Structs::ListMember.new, &block)
+    end
+
+    def Attribute (*args, &block)
+      	traversal(args, Structs::Attribute.new, &block)
+    end
+
+protected
+
+	@@evaluate_stack = []
+
+	def traversal (args, object, &block)
+
+		model = Model.new(object)
+	  	model.name = args.shift
+
+	  	args.flatten.each do |arg|
+	    	if arg.class == String
+	      		arg = arg.to_sym
+	    	end
+
+	    	if arg.class == Symbol
+	      		model[arg] = true
+	    	elsif arg.class == Hash
+	      		arg.each do |key, param|
+	        		model[key] = param
+	      		end
+	    	end
+	  	end
+ 
+	  	if block
+	    	@@evaluate_stack << model
+	        block.call
+	        @@evaluate_stack.pop
 		end
-	
-		class Xml
-		    include Interface
-			
-			def self.open (file)
-			    return Xml.new(LibXML::XML::Document.file(file))
-		    end
-			
-			def initialize (xml_document)
-				@document = xml_document
-			end
-			
-			def attribute (attribute)
-				@document.attributes[attribute]
-			end
-			
-			def content
-				self.new @document.content
-			end
-			
-			def single_element (name)
-				find name do |child|
-					return Xml.new(child)
-				end
-			end
-			
-			def multiple_element (name)
-				result = []
-				find name do |child|
-					result << Xml.new(child)
-				end
-				return result
-			end
-			
-			def seek (path)
-			    @document = @document.find_first(path)
-		    end
+	  	@@evaluate_stack.last << model if @@evaluate_stack.length > 0
+	  	return model
+	end
+
+    module Structs
+        
+		class Base
+			attr_writer :options
+			attr_writer :children
+			attr_writer :name
 			
 			protected
 			
-			def find(name, &block)
-				@document.children.each do |child|
-					if child.node_type == LibXML::XML::Node::ELEMENT_NODE and child.name == name
-						yield child
-					end
-				end	
-			end
-		end
-	end
-
-	module Structs
-	    
-		module Base
-			def _xml_read_source (source, &block)
+			def read_source (source, &block)
 				sources = [source].flatten
-		
 				if sources.length == 0 and not @options[:nillable]
 					result = {@name => {}}
 					source = nil
@@ -107,7 +98,7 @@ module XmlModel
 			end
 		end
 
-		class Root
+      	class Root < Base
 			def fetch
 				if @options[:source]
 				    # Default path is "/@name"
@@ -116,53 +107,42 @@ module XmlModel
 				    source.seek(path)
 				end
 
-				_xml_read_source source do |result|
+				read_source source do |result|
 					return result
 				end
 			end
 		end
 		
-		class ListMember
+		class ListMember < Base
 			def fetch
 				if @options[:source]
 					sources = @options[:source].multiple_element(@name)
 				end
 		
 				results = []
-				_xml_read_source sources do |result|
+				read_source sources do |result|
 					results << result
 				end
 				return results
 			end
 		end
 
-		class Element
+		class Element < Base
 			def fetch
 				if @options[:source]
 					source = @options[:source].single_element(@name)
 				end
 		
-				_xml_read_source source do |result|
+				read_source source do |result|
 					return result
 				end
 			end
 		end
 
-        # TODO: valahogy osszehozni az Element::fetchXml metodussal
-		class List
-		    def fetch
-				if @options[:source]
-					source = @options[:source].single_element(@name)
-				end
-		
-				_xml_read_source source do |result|
-					return result
-				end
-			end
+		class List < Element
 		end
 
-
-		class Attribute
+		class Attribute < Base
 			def fetch
 				if @options[:source]
 					source = @options[:source].attribute(@name)
@@ -177,5 +157,5 @@ module XmlModel
 				end
 			end
 		end
-    end
+	end
 end

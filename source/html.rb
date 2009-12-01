@@ -1,7 +1,10 @@
+require 'source/abstract.rb'
+
 module XmlModel
 	module Source
+		include Interface
+		
 		class Html
-			
 			def initialize (document)
 				@document = document
 			end
