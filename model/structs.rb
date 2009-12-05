@@ -60,10 +60,18 @@ protected
 			attr_writer :options
 			attr_writer :children
 			attr_writer :name
+			attr_writer :model
+						
+			def generate
+				@options[:destination] = @options[:destination].single_element(@name)
+				@children.each do |child|
+					child.render @options[:destination]
+				end
+			end
 			
 			protected
 			
-			def read_source (source, &block)
+			def read (source, &block)
 				sources = [source].flatten
 				if sources.length == 0 and not @options[:nillable]
 					result = {@name => {}}
@@ -77,7 +85,7 @@ protected
 						
 						# Fetch the generated model structure
 						rendered = child.model
-						
+
 						# And merge with the current model's structure
 						result[@name].merge!( rendered ) if rendered.class == Hash
 						result[@name] = rendered if rendered.class == Array
@@ -96,6 +104,12 @@ protected
 					yield result
 				end
 			end
+			
+			def write (destination, &block)
+				@children.each do |child|
+					child.render destination
+				end
+			end
 		end
 
       	class Root < Base
@@ -107,7 +121,7 @@ protected
 				    source.seek(path)
 				end
 
-				read_source source do |result|
+				read source do |result|
 					return result
 				end
 			end
@@ -118,12 +132,21 @@ protected
 				if @options[:source]
 					sources = @options[:source].multiple_element(@name)
 				end
-		
+
 				results = []
-				read_source sources do |result|
+				read sources do |result|
 					results << result
 				end
 				return results
+			end
+			
+			def generate
+				@model.each do |element|
+					destination = @options[:destination].single_element(@name)
+					@children.each do |child|
+						child.render destination
+					end
+				end
 			end
 		end
 
@@ -133,7 +156,7 @@ protected
 					source = @options[:source].single_element(@name)
 				end
 		
-				read_source source do |result|
+				read source do |result|
 					return result
 				end
 			end
@@ -155,6 +178,10 @@ protected
 				else
 					return {}
 				end
+			end
+			
+			def generate
+				@options[:destination][@name] = @model[@name]
 			end
 		end
 	end

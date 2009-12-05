@@ -1,9 +1,10 @@
 $LOAD_PATH << File.dirname(__FILE__)
 
-=begin
 require 'model/structs.rb'
 require 'source/xml.rb'
 require 'source/html.rb'
+require 'destination/xml.rb'
+require 'destination/html.rb'
 
 include XmlModel
 
@@ -24,6 +25,9 @@ Root "firmware", :nillable do
   	end
 end
 
-model.source = doc
-p model.model
-=end
+model.source = html
+destination = Destination::Xml.new
+
+p model.render(destination)
+
+

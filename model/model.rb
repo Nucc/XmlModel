@@ -9,11 +9,13 @@ module XmlModel
         	@struct[:options] = {}
         	@struct[:children] = []
         	@struct[:name] = String.new
+			@struct[:model] = Hash.new
+			
         	@factory = element
         	@factory.options  = @struct[:options]
 			@factory.children = @struct[:children]
 			@factory.name     = @struct[:name]
-			@model = {}
+			@factory.model	  = @struct[:model]
       	end
       
       	def [] (value)
@@ -37,12 +39,59 @@ module XmlModel
 			@struct[:children]
 		end
       
-      	def render (toWhat)
+      	def render (destination)
+			generator = Generator.new(@struct[:model], destination)
+			generator.produce
+			return generator.destination.export
       	end
 
         def source= (source)
 			@struct[:options][:source] = source
-            @model = @factory.send("fetch")
+			@struct[:model] = @factory.fetch
+			@factory.model = @struct[:model]
         end
+
+		def model
+			@struct[:model]
+		end
+	end
+	
+	class Generator
+		attr_reader :destination
+		
+		def initialize (model, destination)
+			@model = model
+			@destination = destination
+			read_root if @destination.destination.nil?
+		end
+		
+		def produce
+			@model.each do |key, value|
+			 	if key == "_content"
+					@destination.content = value
+				elsif value.class == Hash
+					destination = @destination.single_element(key)
+					generator = Generator.new(value, destination)
+					generator.produce
+					
+				elsif value.class == Array
+					destination = @destination.single_element(key)
+					value.each do |val|
+						generator = Generator.new(val, destination)
+						generator.produce
+					end
+				else
+					@destination[key] = value
+				end
+			end
+		end
+		
+		def read_root
+			@model.each do |key, value|
+				@destination = @destination.single_element(key)
+				@model = value
+				return
+			end
+		end
 	end
 end
