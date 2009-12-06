@@ -1,13 +1,9 @@
 require 'source/abstract.rb'
 
 module XmlModel
-	module Source
-		include Interface
-		
+	module Source		
 		class Html
-			def initialize (document)
-				@document = document
-			end
+			include Interface
 			
 			def attribute (attribute)
 				value = @document[attribute]

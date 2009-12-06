@@ -12,7 +12,7 @@ doc  = Source::Xml.open("test.xml")
 html = Source::Html.new({"firmware" => {"settings" => [{"setting" => {"name" => 12, "state" => "no"}}]}})
 
 model = 
-Root "firmware", :nillable do
+Root "firmware" do
 	List "settings" do
     	ListMember "setting" do
       		Attribute "name"
@@ -20,14 +20,25 @@ Root "firmware", :nillable do
     	end
   	end
 
-  	Element "firewall" do
+  	Element "firewall", :nillable do
 		Attribute "active"
   	end
+
+	Option "optiona", :option => 'choice', :default => "no" do
+		Case "yes" do
+			Element "kortefa"
+		end
+		
+		Case "no" do
+			Element "almafa"
+		end 
+	end
 end
 
-model.source = html
+model.source = doc
+model.production = true
 destination = Destination::Xml.new
-
-p model.render(destination)
+a = model.render(destination)
+p a
 
 

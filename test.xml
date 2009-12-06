@@ -1,4 +1,8 @@
 <firmware>
+		<optiona choice="yes">
+			<property/>
+      	</optiona>
+
 		<settings>
 		  <setting name="1"></setting>
 		  <setting name="2" state="off"></setting>
@@ -9,4 +13,6 @@
 	  
 	  <firewall active="yes">
       </firewall>
+
+	  
 </firmware>

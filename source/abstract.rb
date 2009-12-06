@@ -1,6 +1,10 @@
 module XmlModel
 	module Source
 		module Interface
+			def initialize (document)
+				@document = document
+			end
+			
 			def attribute (attribute)
 			end
 			

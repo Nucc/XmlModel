@@ -18,6 +18,14 @@ module XmlModel
       	traversal(args, Structs::ListMember.new, &block)
     end
 
+	def Option (*args, &block)
+		traversal(args, Structs::Option.new, &block)
+	end
+	
+	def Case (*args, &block)
+		traversal(args, Structs::Case.new, &block)
+	end
+
     def Attribute (*args, &block)
       	traversal(args, Structs::Attribute.new, &block)
     end
@@ -61,6 +69,7 @@ protected
 			attr_writer :children
 			attr_writer :name
 			attr_writer :model
+			attr_writer :production
 						
 			def generate
 				@options[:destination] = @options[:destination].single_element(@name)
@@ -83,6 +92,10 @@ protected
 					    # Set the source
 						child.source = source
 						
+						child.production = @production
+						
+						child.fetch
+						
 						# Fetch the generated model structure
 						rendered = child.model
 
@@ -97,6 +110,8 @@ protected
 					result = {@name => {}}
 					@children.each do |child|
 						child.source = source
+						child.production = @production
+						child.fetch
 						rendered = child.model
 						result[@name].merge!( rendered ) if rendered.class == Hash
 						result[@name] = rendered if rendered.class == Array
@@ -155,7 +170,8 @@ protected
 				if @options[:source]
 					source = @options[:source].single_element(@name)
 				end
-		
+				
+				return {} if source.nil? and @options[:nillable] 
 				read source do |result|
 					return result
 				end
@@ -182,6 +198,49 @@ protected
 			
 			def generate
 				@options[:destination][@name] = @model[@name]
+			end
+		end
+		
+		class Option < Base
+			def fetch
+				source = @options[:source].single_element(@name)
+				model = XmlModel::Attribute(@options[:option])
+				
+				children = @children.clone
+				@children.replace([model])
+				attribute = @options[:default]
+
+				attr_value = {}
+				read source do |result|
+					attr_value = result[@name][@options[:option]]
+					break
+				end
+
+				@children.replace children
+				ret = {}
+				read source do |result|
+					ret.merge! result
+				end
+				
+				if @production == false
+					ret[@name][@options[:option]] = attr_value
+					return ret
+				else
+					ret = {@name => ret[@name][attr_value]}
+					ret[@name][@options[:option]] = attr_value
+					return ret
+				end
+			end
+			
+			def generate
+			end
+		end
+		
+		class Case < Base
+			def fetch
+				read @options[:source] do |result|
+					return result
+				end
 			end
 		end
 	end

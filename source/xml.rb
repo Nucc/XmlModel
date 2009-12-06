@@ -11,10 +11,6 @@ module XmlModel
 			    return Xml.new(LibXML::XML::Document.file(file))
 		    end
 	
-			def initialize (xml_document)
-				@document = xml_document
-			end
-	
 			def attribute (attribute)
 				@document.attributes[attribute]
 			end

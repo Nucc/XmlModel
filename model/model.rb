@@ -1,6 +1,7 @@
 module XmlModel
 	class Model
 		attr_reader :model
+		attr_writer :production
 		
         @@sources = {}
         
@@ -10,12 +11,15 @@ module XmlModel
         	@struct[:children] = []
         	@struct[:name] = String.new
 			@struct[:model] = Hash.new
+			@production = false
+			p @production
 			
         	@factory = element
         	@factory.options  = @struct[:options]
 			@factory.children = @struct[:children]
 			@factory.name     = @struct[:name]
 			@factory.model	  = @struct[:model]
+			@factory.production = @production
       	end
       
       	def [] (value)
@@ -23,7 +27,7 @@ module XmlModel
       	end
       
       	def []= (key, value)
-        	@struct[:options][key] = value 
+        	@struct[:options][key] = value
       	end
       
       	def << (model)
@@ -40,19 +44,28 @@ module XmlModel
 		end
       
       	def render (destination)
+			fetch
 			generator = Generator.new(@struct[:model], destination)
 			generator.produce
 			return generator.destination.export
       	end
 
         def source= (source)
-			@struct[:options][:source] = source
-			@struct[:model] = @factory.fetch
-			@factory.model = @struct[:model]
+			@struct[:options][:source] = source.clone
         end
 
 		def model
 			@struct[:model]
+		end
+	
+		def production= (value)
+			@production = value
+			@factory.production = value
+		end
+	
+		def fetch
+			@struct[:model] = @factory.fetch
+			@factory.model = @struct[:model]
 		end
 	end
 	
@@ -66,7 +79,7 @@ module XmlModel
 		end
 		
 		def produce
-			@model.each do |key, value|
+			@model.each do |key, value|				
 			 	if key == "_content"
 					@destination.content = value
 				elsif value.class == Hash
