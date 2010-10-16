@@ -12,6 +12,7 @@ module XmlModel
 		    end
 	
 			def attribute (attribute)
+			  p "aa"
 				@document.attributes[attribute]
 			end
 	

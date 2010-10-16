@@ -4,9 +4,9 @@
 		  <setting name="2" state="off"></setting>
 		</settings>
 	
-	  <firewall active="no">
-	  </firewall>
+	  <firewall active="no"/>
 	  
-	  <firewall active="yes">
-    </firewall>
+	  <active choice="yes">
+			<ip_address>192.168.1.1</ip_address>
+  	</active>
 </firmware>

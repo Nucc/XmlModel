@@ -3,32 +3,32 @@ require 'model/model.rb'
 module XmlModel
 	
 	def Root (*args, &block)
-    	traversal(args, Structs::Root.new, &block)
-    end
-    
-    def Element (*args, &block)
-      	traversal(args, Structs::Element.new, &block)
-    end
-    
-    def List (*args, &block)
-      	traversal(args, Structs::List.new, &block)
-    end
+  	traversal(args, Structs::Root.new, &block)
+  end
+  
+  def Element (*args, &block)
+    	traversal(args, Structs::Element.new, &block)
+  end
+  
+  def List (*args, &block)
+    	traversal(args, Structs::List.new, &block)
+  end
     
 	def ListMember (*args, &block)
-      	traversal(args, Structs::ListMember.new, &block)
-    end
+      traversal(args, Structs::ListMember.new, &block)
+  end
 
 	def Option (*args, &block)
-		traversal(args, Structs::Option.new, &block)
+	  traversal(args, Structs::Option.new, &block)
 	end
 	
 	def Case (*args, &block)
 		traversal(args, Structs::Case.new, &block)
 	end
 
-    def Attribute (*args, &block)
-      	traversal(args, Structs::Attribute.new, &block)
-    end
+  def Attribute (*args, &block)
+    	traversal(args, Structs::Attribute.new, &block)
+  end
 
 protected
 
@@ -37,48 +37,49 @@ protected
 	def traversal (args, object, &block)
 
 		model = Model.new(object)
-	  	model.name = args.shift
+  	model.name = args.shift
 
-	  	args.flatten.each do |arg|
-	    	if arg.class == String
-	      		arg = arg.to_sym
-	    	end
+  	args.flatten.each do |arg|
+    	if arg.class == String
+      		arg = arg.to_sym
+    	end
 
-	    	if arg.class == Symbol
-	      		model[arg] = true
-	    	elsif arg.class == Hash
-	      		arg.each do |key, param|
-	        		model[key] = param
-	      		end
-	    	end
-	  	end
- 
-	  	if block
-	    	@@evaluate_stack << model
-	        block.call
-	        @@evaluate_stack.pop
+    	if arg.class == Symbol
+      		model[arg] = true
+    	elsif arg.class == Hash
+      		arg.each do |key, param|
+        		model[key] = param
+      		end
+    	end
+  	end
+
+  	if block
+    	@@evaluate_stack << model
+        block.call
+        @@evaluate_stack.pop
 		end
-	  	@@evaluate_stack.last << model if @@evaluate_stack.length > 0
-	  	return model
+	
+		@@evaluate_stack.last << model if @@evaluate_stack.length > 0
+		return model
 	end
 
-    module Structs
-        
-		class Base
-			attr_writer :options
-			attr_writer :children
-			attr_writer :name
-			attr_writer :model
-			attr_writer :production
-						
-			def generate
-				@options[:destination] = @options[:destination].single_element(@name)
-				@children.each do |child|
-					child.render @options[:destination]
-				end
-			end
+  module Structs   
+       
+	  class Base
+  		attr_writer :options
+  		attr_writer :children
+  		attr_writer :name
+  		attr_writer :model
+  		attr_writer :production
+					
+  		def generate
+  			@options[:destination] = @options[:destination].single_element(@name)
+  			@children.each do |child|
+  				child.render @options[:destination]
+  			end
+  		end
 			
-			protected
+  	protected
 			
 			def read (source, &block)
 				sources = [source].flatten
@@ -127,7 +128,7 @@ protected
 			end
 		end
 
-      	class Root < Base
+    class Root < Base
 			def fetch
 				if @options[:source]
 				    # Default path is "/@name"
