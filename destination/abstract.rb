@@ -1,6 +1,6 @@
 module XmlModel
 	module Destination
-		module Interface
+    module Interface
 			
 			def initialize
 			end
@@ -9,4 +9,4 @@ module XmlModel
 			end
 		end
 	end
-end
+end  
