@@ -21,25 +21,25 @@ Xml.open loads a config or other xml file that stores information in xml format,
 Each xml file has a specified schema, that needs to be valid after loading a file or saving an xml. The schema looks like this:
 
 Root "firmware" do
-	List "settings" do
-    	ListMember "setting" do
-      		Attribute "name"
-      		Attribute "state"
-    	end
-  	end
+  List "settings" do
+    ListMember "setting" do
+      Attribute "name"
+      Attribute "state"
+    end
+  end
 
-  	Element "firewall", :nillable do
-		  Attribute "active"
-  	end
+  Element "firewall", :nillable do
+    Attribute "active"
+  end
 
-	Option "active", :option => 'choice', :default => "no" do
-		Case "yes" do
-			Element "ip_address"
-		end
-		
-		Case "no" do
-		end 
-	end
+  Option "active", :option => 'choice', :default => "no" do
+    Case "yes" do
+      Element "ip_address"
+    end
+    
+    Case "no" do
+    end 
+  end
 end
 
 
@@ -51,16 +51,16 @@ test.xml
 ========
 
 <firmware>
-		<settings>
-		  <setting name="1"></setting>
-		  <setting name="2" state="off"></setting>
-		</settings>
-	
-	  <firewall active="no"/>
-	  
-	  <active choice="yes">
-			<ip_address>192.168.1.1</ip_address>
-  	</active>
+  <settings>
+    <setting name="1"></setting>
+    <setting name="2" state="off"></setting>
+  </settings>
+  
+  <firewall active="no"/>
+    
+  <active choice="yes">
+    <ip_address>192.168.1.1</ip_address>
+  </active>
 </firmware>
 
 
@@ -71,25 +71,25 @@ doc = Source::Xml.open("test.xml")
 
 model =
 Root "firmware" do
-	List "settings" do
-    	ListMember "setting" do
-      		Attribute "name"
-      		Attribute "state"
-    	end
-  	end
+  List "settings" do
+    ListMember "setting" do
+        Attribute "name"
+        Attribute "state"
+    end
+  end
 
-  	Element "firewall", :nillable do
-		  Attribute "active"
-  	end
+  Element "firewall", :nillable do
+    Attribute "active"
+  end
 
-	Option "active", :option => 'choice', :default => "no" do
-		Case "yes" do
-			Element "ip_address"
-		end
-		
-		Case "no" do
-		end 
-	end
+  Option "active", :option => 'choice', :default => "no" do
+    Case "yes" do
+      Element "ip_address"
+    end
+    
+    Case "no" do
+    end 
+  end
 end
 
 # Defining the source of the model (currently this is the test.xml)
